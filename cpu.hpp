@@ -1,4 +1,4 @@
-#include "decoder.h"
+#include "decoder.hpp"
 class cpu{
 	public:
 		//Registers
@@ -55,9 +55,8 @@ void cpu::load_rom(){
 	//Limit to ROM size of 16K
 	if (size > 0x4000){
 		size = 0x4000;
-		std::cout << "ROM file truncated!" << std::endl;
 	}
-	//dont laugh this was ported from C >:|
+
 	buffer = static_cast<u_int8_t*>(calloc(1,size+1));
 	fread(buffer, size, 1, file);
 
@@ -66,7 +65,7 @@ void cpu::load_rom(){
 	}
 }
 
-#include "mnemonic.h"
+
 
 //skip_bp ignores breakpoints
 void cpu::clock(bool skip_bp){
@@ -81,6 +80,7 @@ void cpu::clock(bool skip_bp){
 		reset = false;
 		holdoff = true;
 	}
+	
 	//Are we at a breakpoint?
 	std::vector<u_int16_t>::iterator it = std::find(breakpoints.begin(), breakpoints.end(), registers[4]);
 	//If so, halt execution
@@ -90,23 +90,27 @@ void cpu::clock(bool skip_bp){
 	}else if (it != breakpoints.end() && skip_bp){
 		halt = false;
 	}
+	
 	if (halt) return; //Do nothing
+	
 	//Fetch instruction
 	u_int16_t tmpinst = memory[registers[4]] << 8;
 	tmpinst = tmpinst + memory[registers[4]+1];
+	
 	//Send to controller
 	controller(tmpinst);
+	
 	//Check if supervisor bit has been set to 0!
 	if ((registers[8] & 256) == 0){
 		supervisor = false;
 	}
+	
 	//Increment PC
 	if (!holdoff) registers[4] = registers[4] + 2;
+	
 	//Reset holdoff
 	if (holdoff) holdoff = false;
 }
-
-#include "controller.h"
 
 void cpu::push_register(char r){
 	u_int16_t fp = registers[5];
@@ -177,8 +181,7 @@ void cpu::exit_supervisor(){
 	supervisor = false;
 	holdoff = true;
 } 
-//0  1  2  3  4  5  6  7  8  9  A
-//ra,rb,rc,rd,pc,fp,bp,rx,rf,rl,sp
+
 void cpu::trigger_interrupt(u_int8_t interrupt){
 	servicing = true;
 	halt = false;

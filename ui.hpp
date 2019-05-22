@@ -2,21 +2,16 @@
 #include <cstring>
 #include <form.h>
 
-	
 //Create a new window and return its pointer
 WINDOW *create_window(int height, int width, int posx, int posy){
 	WINDOW *tmpwin;
-	
 	tmpwin = newwin(height, width, posx, posy);
 	wattron(tmpwin, COLOR_PAIR(1));
 	box(tmpwin,0,0);
-	
 	wrefresh(tmpwin);
-	
 	return tmpwin;
 }
 
-//#TODO
 void update_helpscreen(WINDOW *helpscreen){
 	int h = 20;
 	int w = 90;
@@ -26,7 +21,6 @@ void update_helpscreen(WINDOW *helpscreen){
 	refresh();
 	helpscreen = create_window(h,w,y,x);
 	mvwprintw(helpscreen, 0, 1, "HELP");
-
 	mvwprintw(helpscreen, 1, 1, "The following are a list of commands supported by the NAME user interface:");
 	mvwprintw(helpscreen, 3, 1, "\tq\t-\tQuit program");
 	mvwprintw(helpscreen, 4, 1, "\tr\t-\tSignal RESET");
@@ -42,14 +36,11 @@ void update_helpscreen(WINDOW *helpscreen){
 	mvwprintw(helpscreen, 14, 1, "\tc\t-\tContinue execution at breakpoint");
 	mvwprintw(helpscreen, 15, 1, "\tm\t-\tSwitch between screen and memory dump");
 	mvwprintw(helpscreen, 18, 1, "Press any key to return...");
-	
 	wmove(helpscreen, h/2, 36);
 	timeout(-1);
 	wrefresh(helpscreen);
 	refresh();
-	getch();
-	
-	
+	getch(); //Any key to exit 
 	noecho();
 	wborder(helpscreen, ' ', ' ', ' ',' ',' ',' ',' ',' ');
 	wrefresh(helpscreen);
@@ -60,10 +51,8 @@ void update_helpscreen(WINDOW *helpscreen){
 }
 
 void update_registers(WINDOW *registers, cpu cpu_pointer){
-	std::string register_names[] = {"RA", "RB", "RC", "RD", "PC", "FP", "BP", "RX", "RF", "RL"};
-	
+	std::string register_names[] = {"RA", "RB", "RC", "RD", "PC", "FP", "BP", "RX", "RF", "RL","SP"};
 	registers = create_window(12,20,1,1);
-
 	mvwprintw(registers, 0, 1, "REGISTERS");
 	
 	for (auto i = 0 ; i < sizeof(register_names)/sizeof(register_names[0]); i++){

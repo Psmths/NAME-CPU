@@ -5,30 +5,27 @@
 #include <vector>
 #include <array>
 #include <cstring>
-#include "cpu.h"
-#include "ui.h"
+#include "cpu.hpp"
+#include "ui.hpp"
+#include "mnemonic.hpp"
+#include "controller.hpp"
 
 int main(){
 	//Interface windows
-	WINDOW *registers;
-	WINDOW *dissassembly;
-	WINDOW *memory;
-	WINDOW *helpscreen;
-	WINDOW *status;
-	WINDOW *terminal;
+	WINDOW *registers, *dissassembly, *memory, *helpscreen, *status, *terminal;
 	
 	//Simulation parameters
 	uint16_t pos_m = 0x8000;		//Memory dump position
 	uint16_t pos_d = 0x7FF0;		//Disassembly position
-	bool show_helpscreen = false;	//If true, show HELP panel
+	bool show_helpscreen = false;		//If true, show HELP panel
 	bool single_step = true;		//If true, require SPACE to advance CPU
 	bool locked_d = false;			//Lock disassembly view to PC
-	bool locked_m = false;		//Lock memory view to PC
+	bool locked_m = false;			//Lock memory view to PC
 	bool show_m = true;			//Show memory
 	bool hover = false; 			//Focus on: 0 - disassembly, 1 - memory dump
-	bool catch_keyboard = false; 	//If true, all keys pressed trigger interrupts
+	bool catch_keyboard = false; 		//If true, all keys pressed trigger interrupts
 	
-	int counter = 0;
+	int counter = 0;			//Holdoff updating screen for speed
 	
 	//Graphics setup
 	initscr();
@@ -39,6 +36,8 @@ int main(){
 	timeout(-1);
 	keypad(stdscr, TRUE);
 	mouseinterval(0);
+	
+	//Color pairs
 	init_pair(1, COLOR_YELLOW, COLOR_BLACK);
 	init_pair(2, COLOR_BLACK, COLOR_GREEN);
 	init_pair(3, COLOR_RED, COLOR_BLACK);
@@ -54,23 +53,8 @@ int main(){
 	acpu.registers[5] = 0x7FFF;	//Set FP
 	acpu.registers[6] = 0x7FFF;	//Set BP
 	acpu.registers[8] = 0x0100;	//Enter supervisor mode to FLAGS
-	acpu.halt = true;				//Halt CPU
+	acpu.halt = true;		//Halt CPU
 	acpu.supervisor = true;		//Enter supervisor
-	
-	//Set up IVT
-	acpu.memory[0] = 0xFF; //INT 0
-	acpu.memory[1] = 0x00; //INT 0
-	//acpu.memory[2] = 0x80; //INT 1
-	//acpu.memory[3] = 0x20; //INT 1
-	
-	acpu.memory[0xFF00] = 0x00;
-	acpu.memory[0xFF01] = 0xC4;
-	acpu.memory[0xFF02] = 0x00;
-	acpu.memory[0xFF03] = 0xC4;
-	acpu.memory[0xFF04] = 0x00;
-	acpu.memory[0xFF05] = 0xC4;
-	acpu.memory[0xFF06] = 0x00;
-	acpu.memory[0xFF07] = 0xC4;
 	
 	while(1){
 		
@@ -98,7 +82,7 @@ int main(){
 				clear_memory_dump(memory);
 				update_screen(terminal, acpu);
 				counter = 0;
-			}else{ counter++;}				
+			}else{ counter++; }				
 		}
 		
 		//Update all the other panels

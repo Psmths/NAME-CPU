@@ -332,7 +332,6 @@ void cpu::controller(u_int16_t instruction){
 }
 
 //MMU checks
-
 void cpu::set_register(char r, u_int16_t value){
 	//Check if supervisor mode is ON for PC, BP, FP, RF!
 	if (r == 0x4 || r == 0x8 || r == 0xA){
