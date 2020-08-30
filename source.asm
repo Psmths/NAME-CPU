@@ -1,3 +1,6 @@
+;Sample program #1
+;Interrupt vector routine based keyboard input, displays on output terminal
+
 .org 0
 ADD RX, 2		;0x0002 is the IVT entry for S. INT 1
 ADD RA, 128
@@ -32,7 +35,7 @@ MOV RA, 224
 LSL RA, 8
 ADD RA, 1	;Set RA to keyboard GPIO location
 LDR RB, RD	;Load cursor location
-ADD RB, 2	
+ADD RB, 2
 STR RB, RD	;Store back into memory
 ADD RX, RB	;Add terminal offset
 LDB RC, RA	;Get character
